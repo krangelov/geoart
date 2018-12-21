@@ -1,0 +1,194 @@
+<html>
+	<head>
+		<script>
+			function Point(x,y) {
+				this.x = x;
+				this.y = y;
+			}
+			Point.prototype.radius = 6;
+			Point.prototype.draw = function(ctx) {
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+				ctx.closePath();
+				ctx.fill();
+			}
+			Point.prototype.isHit = function (x,y) {
+				return (Math.sqrt((this.x-x)^2-(this.y-y)^2) <= this.radius);
+			}
+
+			function Line(a,b) {
+				this.a = a;
+				this.b = b;
+			}
+			Line.prototype.draw = function(ctx) {
+				ctx.beginPath();				
+				var y = (this.a.y*this.b.x - this.b.y*this.a.x)/(this.b.x-this.a.x);
+				ctx.moveTo(0, y);
+				var y = (this.a.y*(this.b.x-ctx.canvas.width) + this.b.y*(ctx.canvas.width-this.a.x))/(this.b.x-this.a.x);
+				ctx.lineTo(ctx.canvas.width, y);
+				ctx.closePath();
+				ctx.stroke();
+			}
+			Line.prototype.intersect = function(that) {
+				return that.intersectLine(this);
+			}
+			Line.prototype.intersectLine = function(that) {
+				return new Point
+				 (((this.a.x*this.b.y - this.a.y*this.b.x)*(that.a.x-that.b.x) - (this.a.x-this.b.x)*(that.a.x*that.b.y - that.a.y*that.b.x))/((this.a.x-this.b.x)*(that.a.y-that.b.y) - (this.a.y-this.b.y)*(that.a.x-that.b.x))
+				 ,((this.a.x*this.b.y - this.a.y*this.b.x)*(that.a.y-that.b.y) - (this.a.y-this.b.y)*(that.a.x*that.b.y - that.a.y*that.b.x))/((this.a.x-this.b.x)*(that.a.y-that.b.y) - (this.a.y-this.b.y)*(that.a.x-that.b.x))
+				 );
+			}
+			Line.prototype.intersectCircle = function(that) {
+				var dx  = this.b.x - this.a.x;
+				var dy  = this.b.y - this.a.y;
+				var dr2 = dx**2 + dy**2;
+				var D   = (this.a.x-that.c.x)*(this.b.y-that.c.y) - (this.b.x-that.c.x)*(this.a.y-that.c.y);
+				var r2  = (that.c.x-that.d.x)**2 + (that.c.y-that.d.y)**2;
+				return [new Point(that.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,that.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ,new Point(that.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,that.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ]
+			}
+
+			function Circle(c,d) {
+				this.c = c;
+				this.d = d;
+			}
+			Circle.prototype.draw = function(ctx) {
+				ctx.beginPath();
+				var r = Math.sqrt((this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2);
+				ctx.arc(this.c.x, this.c.y, r, 0, 2 * Math.PI);
+				ctx.closePath();
+				ctx.stroke();
+			}
+			Circle.prototype.intersect = function(that) {
+				return that.intersectCircle(this);
+			}
+			Circle.prototype.intersectLine = function(that) {
+				var dx  = that.b.x - that.a.x;
+				var dy  = that.b.y - that.a.y;
+				var dr2 = dx**2 + dy**2;
+				var D   = (that.a.x-this.c.x)*(that.b.y-this.c.y) - (that.b.x-this.c.x)*(that.a.y-this.c.y);
+				var r2  = (this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2;
+				return [new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ,new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ]
+			}
+			Circle.prototype.intersectCircle = function(that) {
+				var r2 = (this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2;
+				var R2 = (that.c.x-that.d.x)**2 + (that.c.y-that.d.y)**2;
+				var  l = new Line(new Point(0,((r2-R2) - (this.c.x**2+this.c.y**2) + (that.c.x**2+that.c.y**2))/(2*(that.c.y-this.c.y)))
+				                 ,new Point(((r2-R2) - (this.c.x**2+this.c.y**2) + (that.c.x**2+that.c.y**2))/(2*(that.c.x-this.c.x)),0)
+				                 );
+				that = l;
+				var dx  = that.b.x - that.a.x;
+				var dy  = that.b.y - that.a.y;
+				var dr2 = dx**2 + dy**2;
+				var D   = (that.a.x-this.c.x)*(that.b.y-this.c.y) - (that.b.x-this.c.x)*(that.a.y-this.c.y);
+				if (dx > 0)
+				return [new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ,new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ]
+				else
+				return [new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ,new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				       ]
+
+/*				(x-x0)^2 + (y-y0)^2=R^2
+				(x-x1)^2 + (y-y1)^2=r^2
+				2*x*(x1-x0) + 2*y*(y1-y0) + (x0^2+y0^2) - (x1^2+y1^2) = (R^2-r^2)
+				x = ((R^2-r^2) - 2*y*(y1-y0) - ((x0^2+y0^2) - (x1^2+y1^2)))/2*(x1-x0)
+				
+				(x-x1)^2 + ((ax+c)/b+y1)^2=r^2
+				(1+a^2/b^2)x^2-2*(x1-a/b)*x+x1^2+(y1+c/b)^2=0*/
+			}
+
+			function onLoad() {
+				var a = new Point(400,400);
+				var b = new Point(150,250);
+
+				var canvas = document.getElementById("myCanvas");
+				canvas.state = {};
+				canvas.state.points = [a,b]
+				canvas.state.focus  = null;
+
+				onDraw();
+			}
+			
+			function onDraw() {
+				var canvas = document.getElementById("myCanvas");
+
+				[p1,p2] = canvas.state.points;
+
+				var c0 = new Circle(p1,p2);
+				var c1 = new Circle(p2,p1);
+				
+				[p3,p4] = c1.intersect(c0);
+				var c2 = new Circle(p3,p1);
+				
+				[p4,p5] = c2.intersect(c0);
+				var c3 = new Circle(p4,p1);
+				
+				[p6,p7] = c3.intersect(c0);
+				var c4 = new Circle(p6,p1);
+				
+				[p8,p9] = c4.intersect(c0);
+				var c5 = new Circle(p9,p1);
+				
+				[p10,p11] = c5.intersect(c0);
+				var c6 = new Circle(p11,p1);
+
+                var l1 = new Line(p1,p2);
+                var l2 = new Line(p2,p3);
+                var l3 = new Line(p3,p4);
+                var l4 = new Line(p4,p5);
+                var l5 = new Line(p4,p6);
+                var l6 = new Line(p6,p8);
+                
+				var ctx = canvas.getContext("2d");
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				p1.draw(ctx);
+				p2.draw(ctx);
+				c0.draw(ctx);
+				c1.draw(ctx);
+				c2.draw(ctx);
+				c3.draw(ctx);
+				c4.draw(ctx);
+				c5.draw(ctx);
+				c6.draw(ctx);
+				l1.draw(ctx);
+				l2.draw(ctx);
+				l3.draw(ctx);
+				l4.draw(ctx);
+				l5.draw(ctx);
+				l6.draw(ctx);
+			}
+			
+			function onMouseDown(canvas,event) {
+				for (var i in canvas.state.points) {
+					var point = canvas.state.points[i];
+					if (point.isHit(event.offsetX,event.offsetY)) {
+						canvas.state.focus = point;
+						break;
+					}
+				}
+			}
+			
+			function onMouseMove(canvas,event) {
+				if (canvas.state.focus != null) {
+					canvas.state.focus.x = event.offsetX;
+					canvas.state.focus.y = event.offsetY;
+					onDraw();
+				}
+			}
+			
+			function onMouseUp(canvas,event) {
+				canvas.state.focus = null;
+			}
+		</script>
+	</head>
+	<body onload="onLoad()">
+		<canvas id="myCanvas" width="1500" height="900", onmousedown="onMouseDown(this,event)" onmousemove="onMouseMove(this,event)" onMouseUp="onMouseUp(this,event)">
+		</canvas>
+	</body>
+</html>
+
