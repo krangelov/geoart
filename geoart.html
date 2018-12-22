@@ -86,6 +86,12 @@
 					   ,new Point(x - h*(that.c.y - this.c.y)/d, y + h*(that.c.x - this.c.x)/d)]
 			}
 
+			function Arc(c,d,p) {
+				Circle.call(this,c,d);
+				this.p = p;
+			}
+			Arc.prototype = Object.create(Circle.prototype);
+
 			function onLoad() {
 				var a = new Point(400,400);
 				var b = new Point(150,250);
@@ -134,9 +140,9 @@
 				var p11 = l8.intersect(l2);
 				var p12 = l9.intersect(l4);
 				var p13 = l10.intersect(l3);
-				var c7  = new Circle(p2,p11);
-				var c8  = new Circle(p4,p12);
-				var c9  = new Circle(p8,p13);
+				var c7  = new Arc(p2,p11);
+				var c8  = new Arc(p4,p12);
+				var c9  = new Arc(p8,p13);
 				var [p14,p15] = l1.intersect(c7);
 				var c10 = new Circle(p1,p15);
 
@@ -160,11 +166,11 @@
 				l7.draw(ctx);
 				l8.draw(ctx);
 				l9.draw(ctx);
-				l10.draw(ctx);
+				l10.draw(ctx);*/
 				p11.draw(ctx);
 				p12.draw(ctx);
 				p13.draw(ctx);
-				p15.draw(ctx);*/
+				p15.draw(ctx);
 				c7.draw(ctx);
 				c8.draw(ctx);
 				c9.draw(ctx);
@@ -195,8 +201,54 @@
 		</script>
 	</head>
 	<body onload="onLoad()">
-		<canvas id="myCanvas" width="1500" height="900", onmousedown="onMouseDown(this,event)" onmousemove="onMouseMove(this,event)" onMouseUp="onMouseUp(this,event)">
-		</canvas>
+		<table>
+			<tr>
+				<td>
+					<textarea style="height: 900px; width: 400px">
+var c0 = new Circle(p1,p2);
+var c1 = new Circle(p2,p1);
+
+[p3,p4] = c1.intersect(c0);
+var c2 = new Circle(p3,p1);
+
+[p4,p5] = c2.intersect(c0);
+var c3 = new Circle(p4,p1);
+
+[p6,p7] = c3.intersect(c0);
+var c4 = new Circle(p6,p1);
+
+[p8,p9] = c4.intersect(c0);
+var c5 = new Circle(p8,p1);
+
+[p10,p11] = c5.intersect(c0);
+var c6 = new Circle(p10,p1);
+
+var l1  = new Line(p1,p2);
+var l2  = new Line(p1,p3);
+var l3  = new Line(p1,p4);
+var l4  = new Line(p1,p5);
+var l5  = new Line(p1,p6);
+var l6  = new Line(p1,p8);
+var l7  = new Line(p1,p10);
+var l8  = new Line(p2,p4);
+var l9  = new Line(p4,p8);
+var l10 = new Line(p8,p2);
+var p11 = l8.intersect(l2);
+var p12 = l9.intersect(l4);
+var p13 = l10.intersect(l3);
+var c7  = new Arc(p2,p11);
+var c8  = new Arc(p4,p12);
+var c9  = new Arc(p8,p13);
+var [p14,p15] = l1.intersect(c7);
+var c10 = new Circle(p1,p15);
+					</textarea>
+				</td>
+				<td>
+					<canvas id="myCanvas" width="1500" height="900", onmousedown="onMouseDown(this,event)" onmousemove="onMouseMove(this,event)" onMouseUp="onMouseUp(this,event)">
+					</canvas>
+				</td>
+			</tr>
+		</table>
 	</body>
 </html>
 
