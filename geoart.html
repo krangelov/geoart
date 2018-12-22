@@ -76,30 +76,14 @@
 			Circle.prototype.intersectCircle = function(that) {
 				var r2 = (this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2;
 				var R2 = (that.c.x-that.d.x)**2 + (that.c.y-that.d.y)**2;
-				var  l = new Line(new Point(0,((r2-R2) - (this.c.x**2+this.c.y**2) + (that.c.x**2+that.c.y**2))/(2*(that.c.y-this.c.y)))
-				                 ,new Point(((r2-R2) - (this.c.x**2+this.c.y**2) + (that.c.x**2+that.c.y**2))/(2*(that.c.x-this.c.x)),0)
-				                 );
-				that = l;
-				var dx  = that.b.x - that.a.x;
-				var dy  = that.b.y - that.a.y;
-				var dr2 = dx**2 + dy**2;
-				var D   = (that.a.x-this.c.x)*(that.b.y-this.c.y) - (that.b.x-this.c.x)*(that.a.y-this.c.y);
-				if (dx > 0)
-				return [new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ,new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ]
-				else
-				return [new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ,new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ]
+				var d  = Math.sqrt((this.c.x-that.c.x)**2 + (this.c.y-that.c.y)**2);
+				var a  = (r2 - R2 + d*d)/(2*d);
+				var h  = Math.sqrt(r2 - a*a);
+				var x  = this.c.x + (that.c.x-this.c.x)*(a/d);
+				var y  = this.c.y + (that.c.y-this.c.y)*(a/d);
 
-/*				(x-x0)^2 + (y-y0)^2=R^2
-				(x-x1)^2 + (y-y1)^2=r^2
-				2*x*(x1-x0) + 2*y*(y1-y0) + (x0^2+y0^2) - (x1^2+y1^2) = (R^2-r^2)
-				x = ((R^2-r^2) - 2*y*(y1-y0) - ((x0^2+y0^2) - (x1^2+y1^2)))/2*(x1-x0)
-				
-				(x-x1)^2 + ((ax+c)/b+y1)^2=r^2
-				(1+a^2/b^2)x^2-2*(x1-a/b)*x+x1^2+(y1+c/b)^2=0*/
+				return [new Point(x + h*(that.c.y - this.c.y)/d, y - h*(that.c.x - this.c.x)/d)
+					   ,new Point(x - h*(that.c.y - this.c.y)/d, y + h*(that.c.x - this.c.x)/d)]
 			}
 
 			function onLoad() {
@@ -121,7 +105,7 @@
 
 				var c0 = new Circle(p1,p2);
 				var c1 = new Circle(p2,p1);
-				
+
 				[p3,p4] = c1.intersect(c0);
 				var c2 = new Circle(p3,p1);
 				
@@ -132,18 +116,18 @@
 				var c4 = new Circle(p6,p1);
 				
 				[p8,p9] = c4.intersect(c0);
-				var c5 = new Circle(p9,p1);
+				var c5 = new Circle(p8,p1);
 				
 				[p10,p11] = c5.intersect(c0);
-				var c6 = new Circle(p11,p1);
+				var c6 = new Circle(p10,p1);
 
-                var l1 = new Line(p1,p2);
-                var l2 = new Line(p2,p3);
-                var l3 = new Line(p3,p4);
-                var l4 = new Line(p4,p5);
-                var l5 = new Line(p4,p6);
-                var l6 = new Line(p6,p8);
-                
+				var l1 = new Line(p1,p2);
+				var l2 = new Line(p2,p3);
+				var l3 = new Line(p3,p4);
+				var l4 = new Line(p4,p5);
+				var l5 = new Line(p4,p6);
+				var l6 = new Line(p6,p8);
+
 				var ctx = canvas.getContext("2d");
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				p1.draw(ctx);
