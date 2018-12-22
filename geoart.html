@@ -39,13 +39,14 @@
 				 );
 			}
 			Line.prototype.intersectCircle = function(that) {
-				var dx  = this.b.x - this.a.x;
-				var dy  = this.b.y - this.a.y;
-				var dr2 = dx**2 + dy**2;
-				var D   = (this.a.x-that.c.x)*(this.b.y-that.c.y) - (this.b.x-that.c.x)*(this.a.y-that.c.y);
-				var r2  = (that.c.x-that.d.x)**2 + (that.c.y-that.d.y)**2;
-				return [new Point(that.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,that.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ,new Point(that.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,that.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				var a  = (this.b.x - this.a.x)**2 + (this.b.y - this.a.y)**2;
+				var b  = (this.a.x - that.c.x)*(this.a.x-this.b.x) + (this.a.y-that.c.y)*(this.a.y-this.b.y);
+				var c  = (this.a.x - that.c.x)**2 + (this.a.y - that.c.y)**2;
+				var r2 = (that.c.x - that.d.x)**2 + (that.c.y - that.d.y)**2;
+				var l1 = (b + Math.sqrt(b**2 - a*(c-r2)))/a;
+				var l2 = (b - Math.sqrt(b**2 - a*(c-r2)))/a;
+				return [new Point(this.a.x*(1-l1)+this.b.x*l1,this.a.y*(1-l1)+this.b.y*l1)
+				       ,new Point(this.a.x*(1-l2)+this.b.x*l2,this.a.y*(1-l2)+this.b.y*l2)
 				       ]
 			}
 
@@ -64,13 +65,14 @@
 				return that.intersectCircle(this);
 			}
 			Circle.prototype.intersectLine = function(that) {
-				var dx  = that.b.x - that.a.x;
-				var dy  = that.b.y - that.a.y;
-				var dr2 = dx**2 + dy**2;
-				var D   = (that.a.x-this.c.x)*(that.b.y-this.c.y) - (that.b.x-this.c.x)*(that.a.y-this.c.y);
-				var r2  = (this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2;
-				return [new Point(this.c.x+(D*dy + Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx + Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
-				       ,new Point(this.c.x+(D*dy - Math.sign(dy)*dx*Math.sqrt(r2*dr2-D**2))/dr2,this.c.y+(-D*dx - Math.abs(dy)*Math.sqrt(r2*dr2-D**2))/dr2)
+				var a  = (that.b.x - that.a.x)**2 + (that.b.y - that.a.y)**2;
+				var b  = (that.a.x - this.c.x)*(that.a.x-that.b.x) + (that.a.y-this.c.y)*(that.a.y-that.b.y);
+				var c  = (that.a.x - this.c.x)**2 + (that.a.y - this.c.y)**2;
+				var r2 = (this.c.x - this.d.x)**2 + (this.c.y - this.d.y)**2;
+				var l1 = (b + Math.sqrt(b**2 - a*(c-r2)))/a;
+				var l2 = (b - Math.sqrt(b**2 - a*(c-r2)))/a;
+				return [new Point(that.a.x*(1-l1)+that.b.x*l1,that.a.y*(1-l1)+that.b.y*l1)
+				       ,new Point(that.a.x*(1-l2)+that.b.x*l2,that.a.y*(1-l2)+that.b.y*l2)
 				       ]
 			}
 			Circle.prototype.intersectCircle = function(that) {
@@ -91,6 +93,16 @@
 				this.p = p;
 			}
 			Arc.prototype = Object.create(Circle.prototype);
+			Arc.prototype.draw = function(ctx) {
+				ctx.beginPath();
+				var r = Math.sqrt((this.c.x-this.d.x)**2 + (this.c.y-this.d.y)**2);
+				var a1 = Math.asin((this.p.y-this.c.y)/r);
+				if (this.c.x > this.p.x) a1 = Math.PI-a1;
+				var a2 = 2*Math.PI-Math.asin((this.c.y-this.d.y)/r);
+				if (this.c.x > this.d.x) a2 = Math.PI-a2;
+				ctx.arc(this.c.x, this.c.y, r, a1, a2);
+				ctx.stroke();
+			}
 
 			function onLoad() {
 				var a = new Point(400,400);
@@ -140,11 +152,16 @@
 				var p11 = l8.intersect(l2);
 				var p12 = l9.intersect(l4);
 				var p13 = l10.intersect(l3);
-				var c7  = new Arc(p2,p11);
-				var c8  = new Arc(p4,p12);
-				var c9  = new Arc(p8,p13);
+				var c7  = new Circle(p2,p11);
+				var c8  = new Circle(p4,p12);
+				var c9  = new Circle(p8,p13);
 				var [p14,p15] = l1.intersect(c7);
-				var c10 = new Circle(p1,p15);
+				var [p16,p17] = l3.intersect(c8);
+				var [p18,p19] = l6.intersect(c9);
+				var c10 = new Circle(p1,p14);
+				var a1  = new Arc(p2,p14,p13);
+				var a2  = new Arc(p4,p16,p11);
+				var a3  = new Arc(p8,p18,p12);
 
 				var ctx = canvas.getContext("2d");
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -166,14 +183,18 @@
 				l7.draw(ctx);
 				l8.draw(ctx);
 				l9.draw(ctx);
-				l10.draw(ctx);*/
+				l10.draw(ctx);
 				p11.draw(ctx);
 				p12.draw(ctx);
 				p13.draw(ctx);
-				p15.draw(ctx);
+				p14.draw(ctx);
 				c7.draw(ctx);
 				c8.draw(ctx);
 				c9.draw(ctx);
+				p17.draw(ctx);*/
+				a1.draw(ctx);
+				a2.draw(ctx);
+				a3.draw(ctx);
 				c10.draw(ctx);
 			}
 			
