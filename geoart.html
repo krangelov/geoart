@@ -121,18 +121,30 @@
 				[p10,p11] = c5.intersect(c0);
 				var c6 = new Circle(p10,p1);
 
-				var l1 = new Line(p1,p2);
-				var l2 = new Line(p2,p3);
-				var l3 = new Line(p3,p4);
-				var l4 = new Line(p4,p5);
-				var l5 = new Line(p4,p6);
-				var l6 = new Line(p6,p8);
+				var l1  = new Line(p1,p2);
+				var l2  = new Line(p1,p3);
+				var l3  = new Line(p1,p4);
+				var l4  = new Line(p1,p5);
+				var l5  = new Line(p1,p6);
+				var l6  = new Line(p1,p8);
+				var l7  = new Line(p1,p10);
+				var l8  = new Line(p2,p4);
+				var l9  = new Line(p4,p8);
+				var l10 = new Line(p8,p2);
+				var p11 = l8.intersect(l2);
+				var p12 = l9.intersect(l4);
+				var p13 = l10.intersect(l3);
+				var c7  = new Circle(p2,p11);
+				var c8  = new Circle(p4,p12);
+				var c9  = new Circle(p8,p13);
+				var [p14,p15] = l1.intersect(c7);
+				var c10 = new Circle(p1,p15);
 
 				var ctx = canvas.getContext("2d");
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				p1.draw(ctx);
 				p2.draw(ctx);
-				c0.draw(ctx);
+/*				c0.draw(ctx);
 				c1.draw(ctx);
 				c2.draw(ctx);
 				c3.draw(ctx);
@@ -145,6 +157,18 @@
 				l4.draw(ctx);
 				l5.draw(ctx);
 				l6.draw(ctx);
+				l7.draw(ctx);
+				l8.draw(ctx);
+				l9.draw(ctx);
+				l10.draw(ctx);
+				p11.draw(ctx);
+				p12.draw(ctx);
+				p13.draw(ctx);
+				p15.draw(ctx);*/
+				c7.draw(ctx);
+				c8.draw(ctx);
+				c9.draw(ctx);
+				c10.draw(ctx);
 			}
 			
 			function onMouseDown(canvas,event) {
