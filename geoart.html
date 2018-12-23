@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<script src="geoart.js"></script>
+		<script src="parser.js"></script>
 		<script>
 			function onLoad() {
 				var a = new Point(400,400);
@@ -19,7 +20,9 @@
 				var canvas = document.getElementById("myCanvas");
 				var ctx = canvas.getContext("2d");
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				canvas.code(ctx,canvas.state.points);
+				for (var i in canvas.code.drawables) {
+					canvas.code.drawables[i].draw(ctx);
+				}
 			}
 
 			function onMouseDown(canvas,event) {
@@ -46,10 +49,10 @@
 			
 			function onCodeChange(code, canvas) {
 				try {
-					eval("canvas.code = function(ctx,points) {"+code.value+"}");
+					canvas.code = geoart_parser.parse(code.value);
 					onDraw();
 				} catch (e) {
-					//alert(e.message);
+					alert(e.message);
 				}
 			}
 		</script>
@@ -59,82 +62,49 @@
 			<tr>
 				<td>
 					<textarea id="myCode" style="height: 900px; width: 400px" oninput="onCodeChange(this,document.getElementById('myCanvas'))">
-[p1,p2] = points;
-
-var c0 = new Circle(p1,p2);
-var c1 = new Circle(p2,p1);
-
-[p3,p4] = c1.intersect(c0);
-var c2 = new Circle(p3,p1);
-
-[p4,p5] = c2.intersect(c0);
-var c3 = new Circle(p4,p1);
-
-[p6,p7] = c3.intersect(c0);
-var c4 = new Circle(p6,p1);
-
-[p8,p9] = c4.intersect(c0);
-var c5 = new Circle(p8,p1);
-
-[p10,p11] = c5.intersect(c0);
-var c6 = new Circle(p10,p1);
-
-var l1  = new Line(p1,p2);
-var l2  = new Line(p1,p3);
-var l3  = new Line(p1,p4);
-var l4  = new Line(p1,p5);
-var l5  = new Line(p1,p6);
-var l6  = new Line(p1,p8);
-var l7  = new Line(p1,p10);
-var l8  = new Line(p2,p4);
-var l9  = new Line(p4,p8);
-var l10 = new Line(p8,p2);
-var p11 = l8.intersect(l2);
-var p12 = l9.intersect(l4);
-var p13 = l10.intersect(l3);
-var c7  = new Circle(p2,p11);
-var c8  = new Circle(p4,p12);
-var c9  = new Circle(p8,p13);
-var [p14,p15] = l1.intersect(c7);
-var [p16,p17] = l3.intersect(c8);
-var [p18,p19] = l6.intersect(c9);
-var c10 = new Circle(p1,p14);
-var a1  = new Arc(p2,p14,p13);
-var a2  = new Arc(p4,p16,p11);
-var a3  = new Arc(p8,p18,p12);
-
-p1.draw(ctx);
-p2.draw(ctx);
-/*c0.draw(ctx);
-c1.draw(ctx);
-c2.draw(ctx);
-c3.draw(ctx);
-c4.draw(ctx);
-c5.draw(ctx);
-c6.draw(ctx);
-l1.draw(ctx);
-l2.draw(ctx);
-l3.draw(ctx);
-l4.draw(ctx);
-l5.draw(ctx);
-l6.draw(ctx);
-l7.draw(ctx);
-l8.draw(ctx);
-l9.draw(ctx);
-l10.draw(ctx);
-p11.draw(ctx);
-p12.draw(ctx);
-p13.draw(ctx);
-p14.draw(ctx);
-c7.draw(ctx);
-c8.draw(ctx);
-c9.draw(ctx);
-p17.draw(ctx);*/
-a1.draw(ctx);
-a2.draw(ctx);
-a3.draw(ctx);
-c10.draw(ctx);
-					</textarea>
+p1 = point 400 400
+p2 = point 250 250
+c0 = circle p1 p2
+c1 = circle p2 p1
+(p3,px) = intersect c1 c0
+c2 = circle p3 p1
+(p4,p5) = intersect c2 c0
+c3 = circle p4 p1
+(p6,p7) = intersect c3 c0
+c4 = circle p6 p1
+(p8,p9) = intersect c4 c0
+c5 = circle p8 p1
+(p10,pz) = intersect c5 c0
+c6 = circle p10 p1
+l1  = line p1 p2
+l2  = line p1 p3
+l3  = line p1 p4
+l4  = line p1 p5
+l5  = line p1 p6
+l6  = line p1 p8
+l7  = line p1 p10
+l8  = line p2 p4
+l9  = line p4 p8
+l10 = line p8 p2
+p11 = intersect l8 l2
+p12 = intersect l9 l4
+p13 = intersect l10 l3
+c7  = circle p2 p11
+c8  = circle p4 p12
+c9  = circle p8 p13
+(p14,p15) = intersect l1 c7
+(p16,p17) = intersect l3 c8
+(p18,p19) = intersect l6 c9
+c10 = circle p1 p14
+a1  = arc p2 p14 p13
+a2  = arc p4 p16 p11
+a3  = arc p8 p18 p12
+draw p1
+draw p2
+draw a1
+draw a2
+draw a3
+draw c10</textarea>
 				</td>
 				<td>
 					<canvas id="myCanvas" width="1500" height="900", onmousedown="onMouseDown(this,event)" onmousemove="onMouseMove(this,event)" onMouseUp="onMouseUp(this,event)">

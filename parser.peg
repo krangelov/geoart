@@ -1,0 +1,96 @@
+{
+  var env = {};
+  var drawables = [];
+  var addVar = function(meta,o) {
+	if (meta.name in env)
+		error("Variable "+meta.name+" is already defined")
+	o.meta = meta;
+	env[meta.name] = o;
+  };
+  var functions = {
+    point: function(inp,out) {
+    	addVar(out[0],new Point(inp[0],inp[1]));
+    },
+  	circle: function(inp,out) {
+    	addVar(out[0],new Circle(inp[0],inp[1]));
+    },
+    arc: function(inp,out) {
+    	addVar(out[0],new Arc(inp[0],inp[1],inp[2]));
+    },
+    line: function(inp,out) {
+    	addVar(out[0],new Line(inp[0],inp[1]));
+    },
+    intersect: function(inp,out) {
+        var res = inp[0].intersect(inp[1]);
+		if (!Array.isArray(res))
+			res = [res];
+		for (var i in res) {
+			addVar(out[i],res[i]);
+		}
+    },
+    draw: function(inp,out) {
+		drawables.push(inp[0]);
+    }
+  }
+}
+
+start
+  = equations { return {env: env, drawables: drawables}; }
+
+equations
+  = e:equation "\n" s:equations { s.unshift(e); return s; }
+  / e:equation                  { return [e];             }
+
+equation
+  = p:pattern _ "=" c:call { c.function(c.args,p);  }
+  / c:call                 { c.function(c.args,[]); }
+
+call
+  = f:identifier a:arguments { if (f in functions)
+                                 return {function: functions[f], args: a};
+                               else
+                                 error ("Unknown function "+f)
+                             }
+  / f:identifier             { if (f in functions)
+                                 return {function: functions[f], args: []};
+                               else
+                                 error ("Unknown function "+f)
+                             }
+
+pattern "pattern"
+  = x:variable                     { return [x];  }               
+  / _ "(" list:variable_list _ ")" { return list; } 
+
+variable_list
+  = x:variable _ "," list:variable_list { list.unshift(x); return list; }
+  / x:variable                          { return [x];                   }
+
+variable
+  = x:identifier    { return {name: x, loc: location()};  }
+
+arguments
+  = x:argument list:arguments { list.unshift(x);
+                                return list;
+                              }
+  / x:argument                { return [x]; }
+
+argument
+  = x:identifier { if (x in env) {
+                     return env[x];
+                   } else {
+                     error("Undefined variable "+x);
+                   }
+                 }
+  / x:integer    { return x }
+
+identifier "identifier"
+  = _ chars:identifier0 { return chars; }
+
+identifier0 "identifier"
+  = ([a-zA-Z][a-zA-Z0-9_']*) { return text(); }
+
+integer "integer"
+  = _ [0-9]+ { return parseInt(text()); }
+
+_ "whitespace"
+  = [ \t\r]*
